@@ -1,0 +1,49 @@
+﻿.virtual-keyboard {
+    position: absolute;
+    bottom: 0;
+
+    $vk: &;
+
+    &__keys-row {
+        display: flex;
+        justify-content: center;
+    }
+
+    &__key {
+        min-width: 70px;
+        max-width: 70px;
+        padding: 15px;
+        display: flex;
+        flex: 1;
+
+        &::after {
+            content: attr(data-lowercase);
+            display: block;
+        }
+
+        &--control-key {
+            max-width: inherit;
+        }
+
+        &--space {
+            flex: 10;
+        }
+
+        &--caps,
+        &--backspace {
+            max-width: 150px;
+            flex: 2;
+        }
+    }
+
+    &--caps {
+        #{$vk}__key {
+            &::after {
+                content: attr(data-uppercase);
+            }
+        }
+    }
+}
+
+// shame file for workarounds/hacks
+@import './_shame';

@@ -1,0 +1,49 @@
+{
+  "name": "virtualkeyboard",
+  "version": "0.0.1",
+  "description": "VirtualKeyboard",
+  "main": "dist/virtual-keyboard.min.js",
+  "scripts": {
+    "dev": "webpack --config webpack.dev.js",
+    "minify": "minify dist/virtual-keyboard.js -o dist/virtual-keyboard.min.js",
+    "build": "webpack --config webpack.prod.js && minify dist/virtual-keyboard.js -o dist/virtual-keyboard.min.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/patrickvdlinden/VirtualKeyboard.git"
+  },
+  "author": "Patrick van der Linden",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/patrickvdlinden/VirtualKeyboard/issues"
+  },
+  "homepage": "https://github.com/patrickvdlinden/VirtualKeyboard#readme",
+  "devDependencies": {
+    "@babel/core": "^7.14.0",
+    "@babel/plugin-proposal-nullish-coalescing-operator": "^7.13.8",
+    "@babel/plugin-proposal-optional-chaining": "^7.13.12",
+    "@babel/preset-env": "^7.14.1",
+    "@typescript-eslint/eslint-plugin": "^4.22.1",
+    "@typescript-eslint/parser": "^4.22.1",
+    "babel-loader": "^8.2.2",
+    "babel-minify": "^0.5.1",
+    "clean-webpack-plugin": "^3.0.0",
+    "copy-webpack-plugin": "^8.1.1",
+    "core-js": "^3.11.2",
+    "css-loader": "^5.2.4",
+    "eslint": "^7.25.0",
+    "eslint-loader": "^4.0.2",
+    "file-loader": "^6.2.0",
+    "mini-css-extract-plugin": "^1.6.0",
+    "sass": "^1.32.12",
+    "sass-loader": "^11.0.1",
+    "style-loader": "^2.0.0",
+    "stylelint": "^13.13.1",
+    "stylelint-webpack-plugin": "^2.1.1",
+    "ts-loader": "^9.1.1",
+    "typescript": "^4.2.4",
+    "webpack": "^5.36.2",
+    "webpack-cli": "^4.6.0",
+    "webpack-merge": "^5.7.3"
+  }
+}
