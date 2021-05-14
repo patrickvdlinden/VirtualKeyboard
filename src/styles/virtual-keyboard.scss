@@ -4,20 +4,19 @@
 
     $vk: &;
 
-    &__keys-row {
+    &__keys-row,
+    &__control-keys {
         display: flex;
         justify-content: center;
     }
 
     &__key {
-        min-width: 70px;
-        max-width: 70px;
+        width: 70px;
         padding: 15px;
         display: flex;
-        flex: 1;
 
         &::after {
-            content: attr(data-lowercase);
+            content: attr(data-value);
             display: block;
         }
 
@@ -25,13 +24,15 @@
             max-width: inherit;
         }
 
-        &--space {
+        &--space-bar {
             flex: 10;
         }
 
-        &--caps,
+        &--caps {
+            flex: 2;
+        }
+
         &--backspace {
-            max-width: 150px;
             flex: 2;
         }
     }
@@ -39,7 +40,7 @@
     &--caps {
         #{$vk}__key {
             &::after {
-                content: attr(data-uppercase);
+                content: attr(data-value-uppercase);
             }
         }
     }

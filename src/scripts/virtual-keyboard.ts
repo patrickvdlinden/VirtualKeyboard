@@ -2,17 +2,16 @@
 import { VirtualKeyboardOptions, VirtualKeyboardOptionsDefaults } from './virtual-keyboard-options';
 import { VirtualKeyboardKey } from './virtual-keyboard-key';
 import { VirtualKeyboardComponentsList } from './components/virtual-keyboard-components-list';
-import { VirtualKeyboardKeys } from './components/virtual-keyboard-keys';
 
 export class VirtualKeyboard
 {
     private static _globalOptions?: VirtualKeyboardOptions;
     private static readonly _instances: VirtualKeyboard[] = [];
 
-    private _targetElements: Array<HTMLElement> = [];
+    private readonly _targetElements: Array<HTMLElement> = [];
+    private readonly _keys: Array<Array<VirtualKeyboardKey>> = [];
     private _focusedElement?: HTMLElement;
     private _containerElement?: HTMLElement;
-    private _keys: Array<Array<VirtualKeyboardKey>> = [];
     private _capsActive = false;
     private _capsLocked = false;
 
@@ -21,6 +20,8 @@ export class VirtualKeyboard
 
     // An array of VirtualKeyboard components. Allows adding and/or removing of custom components.
     public readonly components: VirtualKeyboardComponentsList = new VirtualKeyboardComponentsList(this);
+
+    public test = '';
 
     public constructor(
         selectorOrElements?: string | NodeListOf<HTMLElement> | HTMLElement,
@@ -35,14 +36,18 @@ export class VirtualKeyboard
 
         if (!!selectorOrElements)
         {
-            this.parseTargetElements(selectorOrElements);
+            this._targetElements = this.parseTargetElements(selectorOrElements);
         }
 
-        this.parseKeys(this.options?.layout);
+        this._keys = this.parseKeys(this.options?.layout);
 
-        if (this.options.addDefaultComponents)
+        if (!!this.options.defaultComponents)
         {
-            this.addDefaultComponents();
+            const defaultComponents = this.options.defaultComponents();
+            for (const component of defaultComponents)
+            {
+                this.components.add(component);
+            }
         }
 
         if (this.options.openKeyboardOnFocus)
@@ -66,9 +71,9 @@ export class VirtualKeyboard
         return this._targetElements;
     }
 
-    public get focusedElement(): HTMLElement | null
+    public get focusedElement(): HTMLElement | undefined
     {
-        return this._focusedElement || null;
+        return this._focusedElement;
     }
 
     public get containerElement(): HTMLElement
@@ -138,6 +143,11 @@ export class VirtualKeyboard
             vk.close();
         }
 
+        if (this.targetElements.indexOf(targetElement) === -1)
+        {
+            throw new Error('Could not open VirtualKeyboard for the target element.');
+        }
+
         this._focusedElement = targetElement;
 
         if (!this._containerElement)
@@ -167,7 +177,7 @@ export class VirtualKeyboard
         this.components.onVirtualKeyboardClosed(focusedElement);
     }
 
-    protected parseTargetElements(selectorOrElements: string | NodeListOf<HTMLElement> | HTMLElement): void
+    protected parseTargetElements(selectorOrElements: string | NodeListOf<HTMLElement> | HTMLElement): HTMLElement[]
     {
         if (!this.options.allowedElements || !this.options.allowedElements.length)
         {
@@ -181,25 +191,28 @@ export class VirtualKeyboard
 
         if (selectorOrElements instanceof NodeList || selectorOrElements instanceof HTMLElement)
         {
+            const targetElements: HTMLElement[] = [];
             if (selectorOrElements instanceof NodeList)
             {
                 for (const el of selectorOrElements)
                 {
                     if (this.options.allowedElements.indexOf((el.nodeName || '').toLowerCase()) >= 0)
                     {
-                        this._targetElements.push(el);
+                        targetElements.push(el);
                     }
                 }
             }
             else if (this.options.allowedElements.indexOf((selectorOrElements.nodeName || '').toLowerCase()) >= 0)
             {
-                this._targetElements = [selectorOrElements];
+                targetElements.push(selectorOrElements);
             }
 
-            if (!this._targetElements.length)
+            if (!targetElements.length)
             {
-                console.warn('No target elements found for VirtualKeyboard.');
+                console.warn('No valid target elements found for VirtualKeyboard.');
             }
+
+            return targetElements;
         }
         else
         {
@@ -241,7 +254,7 @@ export class VirtualKeyboard
 
         if (!!this.options.id)
         {
-            this.containerElement.id = this.options.id;
+            containerElement.id = this.options.id;
         }
 
         document.body.appendChild(containerElement);
@@ -249,43 +262,42 @@ export class VirtualKeyboard
         return containerElement;
     }
 
-    protected addDefaultComponents(): void
+    protected parseKeys(layoutOrPath: Array<Array<string | string[]>> | string | undefined): Array<VirtualKeyboardKey[]>
     {
-        this.components.add(new VirtualKeyboardKeys());
-    }
-
-    protected parseKeys(layout: Array<Array<string | string[]>> | string | undefined): void
-    {
-        if (!layout)
+        if (!layoutOrPath)
         {
             throw new Error('Missing keys layout.');
         }
 
-        if (typeof layout === 'string')
+        let layout: Array<Array<string | string[]>> = [];
+        if (typeof layoutOrPath === 'string')
         {
             // Layout is a string, assume it's a path to a json file.
-            // TODO: Retrieve json.
-            layout = [];
+            layout = this.downloadKeysJson(layoutOrPath);
+        }
+        else
+        {
+            layout = layoutOrPath;
         }
 
         const keys: Array<VirtualKeyboardKey[]> = [];
         for (const row of layout)
         {
-            const keysRow = [];
+            const keysRow: VirtualKeyboardKey[] = [];
             for (const key of row)
             {
                 if (typeof key === 'string')
                 {
                     keysRow.push({
-                        lowercase: key[0],
-                        uppercase: key.length > 1 ? key[1] : undefined
+                        value: key[0],
+                        uppercaseValue: key.length > 1 ? key[1] : undefined
                     });
                 }
                 else
                 {
                     keysRow.push({
-                        lowercase: key[0][0],
-                        uppercase: key[0].length > 1 ? key[0][1] : undefined,
+                        value: key[0][0],
+                        uppercaseValue: key[0].length > 1 ? key[0][1] : undefined,
                         specialCharacters: key.length > 1 ? [...key[1]] : []
                     });
                 }
@@ -294,6 +306,12 @@ export class VirtualKeyboard
             keys.push(keysRow);
         }
 
-        this._keys = keys;
+        return keys;
+    }
+
+    protected downloadKeysJson(path: string): Array<Array<string | string[]>>
+    {
+        // TODO: Retrieve json.
+        return [];
     }
 }

@@ -4,10 +4,16 @@ import { VirtualKeyboard } from '../virtual-keyboard';
 export class VirtualKeyboardComponentsList
 {
     private readonly _components: Array<VirtualKeyboardComponent> = [];
-    private _containerElement?: HTMLElement;
+    private readonly _owner: VirtualKeyboardComponent | VirtualKeyboard;
 
-    public constructor(private virtualKeyboard?: VirtualKeyboard)
+    public constructor(owner: VirtualKeyboardComponent | VirtualKeyboard)
     {
+        this._owner = owner;
+    }
+
+    public get owner(): VirtualKeyboardComponent | VirtualKeyboard
+    {
+        return this._owner;
     }
 
     public get length(): number
@@ -15,18 +21,11 @@ export class VirtualKeyboardComponentsList
         return this._components.length;
     }
 
-    public get containerElement(): HTMLElement | undefined
+    public init(): void
     {
-        return this._containerElement ?? this.virtualKeyboard?.containerElement;
-    }
-
-    public init(virtualKeyboard: VirtualKeyboard): void
-    {
-        this.virtualKeyboard = virtualKeyboard;
-
         for (const component of this._components)
         {
-            component.init(this.virtualKeyboard);
+            component.init(this._owner);
         }
     }
 
@@ -76,10 +75,7 @@ export class VirtualKeyboardComponentsList
 
         for (const component of components)
         {
-            if (!!this.virtualKeyboard && (!component.isInitialized || component.virtualKeyboard !== this.virtualKeyboard))
-            {
-                component.init(this.virtualKeyboard);
-            }
+            component.init(this._owner);
         }
 
         return total;

@@ -1,4 +1,8 @@
-﻿export interface VirtualKeyboardOptions
+﻿import { VirtualKeyboardKeys } from './components/virtual-keyboard-keys';
+import { VirtualKeyboardComponent } from './components/virtual-keyboard-component';
+import { VirtualKeyboardControlKeys } from './components/virtual-keyboard-control-keys';
+
+export interface VirtualKeyboardOptions
 {
     // Specifies the key layout to render on the VirtualKeyboard.
     // Default: US International layout (QWERTY).
@@ -11,10 +15,6 @@
     // When a string is given, it is assumed to be a path to a file (i.e. 'keyboard.json').
     // When a language is specified to the options, this language value will be added to the path (i.e. 'keyboard.en.json' or 'keyboard.english.json').
     layout?: Array<Array<string | Array<string>>> | string;
-
-    // Specifies if the default VirtualKeyboard components should be added.
-    // Default: true.
-    addDefaultComponents?: boolean;
 
     // Specifies the allowed elements VirtualKeyboard can be bound to.
     // Default: ['input', 'textarea'].
@@ -61,9 +61,13 @@
     // Default: 'virtual-keyboard'.
     cssClassName?: string;
 
-    // Specifies the dblclick event threshold. This is the max time between 2 consecutive clicks before the dblclick event is invoked.
+    // Specifies the 'dblclick' event threshold in ms. This is the max time between 2 consecutive clicks before the 'dblclick' event is fired.
     // Default: 350.
     dblclickThreshold?: number;
+
+    // Specifies which components should be added to the VirtualKeyboard by default.
+    // Default: () => [new VirtualKeyboardKeys(), new VirtualKeyboardControlKeys()].
+    defaultComponents?: () => VirtualKeyboardComponent[];
 
     // HTML id for the VirtualKeyboard container element.
     // Default: undefined.
@@ -72,13 +76,17 @@
     // Default: 'en'.
     language?: string;
 
-    // Specifies the long-press event threshold. This is the time required to click and hold before the event is invoked.
-    // Default: 350.
+    // Specifies the 'longpress' event threshold in ms. This is the time required to click and hold before the 'longpress' event is fired.
+    // Default: 250.
     longPressThreshold?: number;
 
     // Specifies if the VirtualKeyboard should be opened whenever the target element(s) are focused.
     // Default: true.
     openKeyboardOnFocus?: boolean;
+
+    // TODO: Name and description.
+    // Default: 50.
+    pressAndHoldThreshold?: number;
 
     // Specifies if the space bar key is enabled.
     // Default: true.
@@ -109,7 +117,6 @@ export const VirtualKeyboardDefaultLayoutNumeric: Array<Array<string | Array<str
 export const VirtualKeyboardOptionsDefaults: VirtualKeyboardOptions
     = {
         layout: VirtualKeyboardDefaultLayoutNumeric,
-        addDefaultComponents: true,
         allowedElements: ['input', 'textarea'],
         allowSpecialCharacters: true,
         backspaceEnabled: true,
@@ -118,9 +125,11 @@ export const VirtualKeyboardOptionsDefaults: VirtualKeyboardOptions
         capsMode: 'both',
         cssClassName: 'virtual-keyboard',
         dblclickThreshold: 350,
+        defaultComponents: () => [new VirtualKeyboardKeys(), new VirtualKeyboardControlKeys()],
         language: 'en',
-        longPressThreshold: 350,
+        longPressThreshold: 250,
         openKeyboardOnFocus: true,
+        pressAndHoldThreshold: 50,
         spaceBarEnabled: true,
         spaceBarIcon: '',
         spaceBarLabel: ' ',

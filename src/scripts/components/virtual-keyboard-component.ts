@@ -1,79 +1,88 @@
 ﻿import { VirtualKeyboard } from '../virtual-keyboard';
 import { VirtualKeyboardComponentsList } from './virtual-keyboard-components-list';
+import { VirtualKeyboardKeyComponent } from '@/components/virtual-keyboard-key-component';
 
 export abstract class VirtualKeyboardComponent
 {
     private _containerElement?: HTMLElement;
-
-    public enabled = true;
-    public virtualKeyboard!: VirtualKeyboard;
-    public isInitialized = false;
+    private _owner?: VirtualKeyboardComponent | VirtualKeyboard;
+    private _isInitialized = false;
+    private _element?: HTMLElement | null;
 
     // A list of child components.
-    public readonly components: VirtualKeyboardComponentsList = new VirtualKeyboardComponentsList();
+    public readonly components: VirtualKeyboardComponentsList = new VirtualKeyboardComponentsList(this);
 
-    constructor(enabled?: boolean)
+    public get isInitialized(): boolean
     {
-        if (enabled === undefined || enabled === null)
-        {
-            this.enabled = true;
-        }
-        else
-        {
-            this.enabled = enabled;
-        }
+        return this._isInitialized;
     }
 
     public get containerElement(): HTMLElement
     {
-        return this._containerElement ?? this.virtualKeyboard.containerElement;
+        return this._containerElement as HTMLElement;
     }
 
-    public init(virtualKeyboard: VirtualKeyboard): void
+    public get element(): HTMLElement | null | undefined
     {
-        if (!this.enabled)
+        return this._element;
+    }
+
+    public get owner(): VirtualKeyboardComponent | VirtualKeyboard
+    {
+        if (!this._owner)
         {
-            return;
+            throw new Error('The owner has not been defined (yet).');
         }
 
-        this.virtualKeyboard = virtualKeyboard;
+        return this._owner;
+    }
+
+    public get parent(): VirtualKeyboardComponent | undefined
+    {
+        return this._owner instanceof VirtualKeyboardComponent
+            ? this._owner
+            : undefined;
+    }
+
+    public get virtualKeyboard(): VirtualKeyboard
+    {
+        return this._owner instanceof VirtualKeyboard
+            ? this._owner
+            : this._owner?.virtualKeyboard as VirtualKeyboard;
+    }
+
+    public init(owner: VirtualKeyboardComponent | VirtualKeyboard): void
+    {
+        this._owner = owner;
 
         if (this.isInitialized)
         {
-            // Make sure the child components are initialized as well,
-            // even if this component was already initialized before.
-            this.components.init(virtualKeyboard);
             return;
         }
 
         this.onInit();
-        this.components.init(virtualKeyboard);
-        this.onInitDone();
+        this.components.init();
 
-        this.isInitialized = true;
+        this._isInitialized = true;
+        this.onInitDone();
     }
 
     public setup(containerElement: HTMLElement): void
     {
         this._containerElement = containerElement;
 
-        if (!this.enabled)
+        if (!this.containerElement)
         {
-            return;
+            throw new Error('The containerElement is missing.');
         }
 
-        if (!this.virtualKeyboard.containerElement)
+        this._element = this.onSetup();
+        if (!!this.element)
         {
-            throw new Error('The VirtualKeyboard\'s containerElement is missing.');
+            containerElement.appendChild(this.element);
         }
 
-        const element = this.onSetup();
-        if (element)
-        {
-            containerElement.appendChild(element);
-        }
-
-        this.components.setup(element ?? this.containerElement);
+        this.components.setup(this.element ?? containerElement);
         this.onSetupDone();
     }
 
@@ -86,6 +95,16 @@ export abstract class VirtualKeyboardComponent
     }
 
     protected onSetupDone(): void
+    {
+        // No base implementation.
+    }
+
+    protected onDisabled(): void
+    {
+        // No base implementation.
+    }
+
+    protected onEnabled(): void
     {
         // No base implementation.
     }

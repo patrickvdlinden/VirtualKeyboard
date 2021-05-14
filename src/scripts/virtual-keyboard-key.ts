@@ -1,6 +1,6 @@
 ﻿export interface VirtualKeyboardKey
 {
-    lowercase: string;
-    uppercase?: string;
+    value: string;
+    uppercaseValue?: string;
     specialCharacters?: string[];
 }
