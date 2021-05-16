@@ -30,6 +30,7 @@ export class VirtualKeyboardKeyComponent extends VirtualKeyboardComponent
     {
         const keyElement = document.createElement('button');
         keyElement.type = 'button';
+        keyElement.classList.add(`${this.virtualKeyboard.cssClassName}__button`);
         keyElement.classList.add(`${this.virtualKeyboard.cssClassName}__key`);
 
         keyElement.addEventListener('mousedown', (e) => this.onKeyDown(e));
@@ -136,7 +137,10 @@ export class VirtualKeyboardKeyComponent extends VirtualKeyboardComponent
                 : keyElement.dataset.value;
 
             const targetElement = this.virtualKeyboard.focusedElement;
-            this.appendValue(targetElement, value);
+            if (!!targetElement && value !== undefined && value !== null && value.length > 0)
+            {
+                this.appendValue(targetElement, value);
+            }
 
             if (this.virtualKeyboard.capsActive && !this.virtualKeyboard.capsLocked)
             {

@@ -1,5 +1,5 @@
 ﻿module.exports = {
-    "ignoreFiles": ["./src/scss/_shame.scss", "./src/scss/vendors/**/*.scss", "**/*.css"],
+    "ignoreFiles": ["./src/scss/_shame.scss", "**/*.css"],
     "rules": {
         "at-rule-name-case": "lower",
         "at-rule-name-space-after": "always",

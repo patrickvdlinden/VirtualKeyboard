@@ -29,24 +29,7 @@ export class VirtualKeyboardCapsKey extends VirtualKeyboardControlKey
         }
 
         this.virtualKeyboard.capsActive = !this.virtualKeyboard.capsActive;
-
-        const capsClassName = `${this.virtualKeyboard.cssClassName}--caps`;
-        if (this.virtualKeyboard.capsActive)
-        {
-            if (!this.virtualKeyboard.containerElement.classList.contains(capsClassName))
-            {
-                this.virtualKeyboard.containerElement.classList.add(capsClassName);
-            }
-        }
-        else
-        {
-            this.virtualKeyboard.containerElement.classList.remove(capsClassName);
-        }
-
         this.virtualKeyboard.capsLocked = false;
-
-        const capsLockedClassName = `${this.virtualKeyboard.cssClassName}--caps-locked`;
-        this.virtualKeyboard.containerElement.classList.remove(capsLockedClassName);
 
         return true;
     }
@@ -58,13 +41,8 @@ export class VirtualKeyboardCapsKey extends VirtualKeyboardControlKey
             return false;
         }
 
+        this.virtualKeyboard.capsActive = true;
         this.virtualKeyboard.capsLocked = true;
-
-        const capsLockedClassName = `${this.virtualKeyboard.cssClassName}--caps-locked`;
-        if (!this.virtualKeyboard.containerElement.classList.contains(capsLockedClassName))
-        {
-            this.virtualKeyboard.containerElement.classList.add(capsLockedClassName);
-        }
 
         return false;
     }

@@ -1,6 +1,7 @@
 ﻿import { VirtualKeyboardKeys } from './components/virtual-keyboard-keys';
 import { VirtualKeyboardComponent } from './components/virtual-keyboard-component';
 import { VirtualKeyboardControlKeys } from './components/virtual-keyboard-control-keys';
+import { VirtualKeyboardCloseButton } from './components/virtual-keyboard-close-button';
 
 export interface VirtualKeyboardOptions
 {
@@ -52,10 +53,19 @@ export interface VirtualKeyboardOptions
     // Default: 'both'.
     //
     // Available values:
-    // - once: Every key pressed after the caps key, resets the caps to lower case.
+    // - once: When caps is activated, it will reset to lowercase after every key press.
     // - lock: When caps is activated, it is locked to uppercase until the caps key is pressed again.
-    // - both: The caps key defaults to 'once'. Double click/tap locks it. This is usually how mobile keyboards work.
+    // - both: The caps key defaults to 'once'. Double press locks it. This is usually how mobile keyboards work.
     capsMode?: 'once' | 'lock' | 'both';
+
+    // Specifies if caps should be activated when opening VirtualKeyboard.
+    // Default: 'enabled'.
+    //
+    // Available values:
+    // - once: Caps will be activated once VirtualKeyboard opens. Resets to lowercase after a key is pressed.
+    // - lock: Caps will be activated when VirtualKeyboard opens and stays locked to uppercase until the caps key is pressed.
+    // - off: Caps will not be activated when VirtualKeyboard opens.
+    capsStartMode?: 'once' | 'lock' | 'off';
 
     // The CSS class name for the container element.
     // Default: 'virtual-keyboard'.
@@ -65,9 +75,9 @@ export interface VirtualKeyboardOptions
     // Default: 350.
     dblclickThreshold?: number;
 
-    // Specifies which components should be added to the VirtualKeyboard by default.
-    // Default: () => [new VirtualKeyboardKeys(), new VirtualKeyboardControlKeys()].
-    defaultComponents?: () => VirtualKeyboardComponent[];
+    // Specifies which components should always be added to the VirtualKeyboard.
+    // Default: () => [new VirtualKeyboardKeys(), new VirtualKeyboardControlKeys(), new VirtualKeyboardCloseButton()].
+    components?: () => VirtualKeyboardComponent[];
 
     // HTML id for the VirtualKeyboard container element.
     // Default: undefined.
@@ -123,9 +133,10 @@ export const VirtualKeyboardOptionsDefaults: VirtualKeyboardOptions
         capsEnabled: true,
         capsLabel: '',
         capsMode: 'both',
+        capsStartMode: 'once',
         cssClassName: 'virtual-keyboard',
         dblclickThreshold: 350,
-        defaultComponents: () => [new VirtualKeyboardKeys(), new VirtualKeyboardControlKeys()],
+        components: () => [new VirtualKeyboardKeys(), new VirtualKeyboardControlKeys(), new VirtualKeyboardCloseButton()],
         language: 'en',
         longPressThreshold: 250,
         openKeyboardOnFocus: true,

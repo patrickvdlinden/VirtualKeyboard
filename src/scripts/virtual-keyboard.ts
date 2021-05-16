@@ -21,8 +21,6 @@ export class VirtualKeyboard
     // An array of VirtualKeyboard components. Allows adding and/or removing of custom components.
     public readonly components: VirtualKeyboardComponentsList = new VirtualKeyboardComponentsList(this);
 
-    public test = '';
-
     public constructor(
         selectorOrElements?: string | NodeListOf<HTMLElement> | HTMLElement,
         options?: VirtualKeyboardOptions)
@@ -30,30 +28,15 @@ export class VirtualKeyboard
         VirtualKeyboard._instances.push(this);
 
         this.options = Object.assign(
+            {},
             VirtualKeyboard.defaultOptions,
-            VirtualKeyboard._globalOptions,
+            VirtualKeyboard.globalOptions,
             options || {});
 
-        if (!!selectorOrElements)
-        {
-            this._targetElements = this.parseTargetElements(selectorOrElements);
-        }
-
+        this._targetElements = this.parseTargetElements(selectorOrElements);
         this._keys = this.parseKeys(this.options?.layout);
-
-        if (!!this.options.defaultComponents)
-        {
-            const defaultComponents = this.options.defaultComponents();
-            for (const component of defaultComponents)
-            {
-                this.components.add(component);
-            }
-        }
-
-        if (this.options.openKeyboardOnFocus)
-        {
-            this.registerFocusEventListeners();
-        }
+        this.registerDefaultComponents();
+        this.registerFocusEventListeners();
     }
 
     public static get defaultOptions(): VirtualKeyboardOptions
@@ -63,7 +46,7 @@ export class VirtualKeyboard
 
     public static get globalOptions(): VirtualKeyboardOptions
     {
-        return this._globalOptions || this.defaultOptions;
+        return this._globalOptions || {};
     }
 
     public get targetElements(): Array<HTMLElement>
@@ -125,13 +108,26 @@ export class VirtualKeyboard
     {
         this._capsLocked = locked;
 
-        // TODO: Implement event listeners.
+        if (!this.containerElement)
+        {
+            return;
+        }
+
+        const capsLockClassName = `${this.cssClassName}--caps-lock`;
+        if (locked && !this.containerElement.classList.contains(capsLockClassName))
+        {
+            this.containerElement.classList.add(capsLockClassName);
+        }
+        else if (!locked)
+        {
+            this.containerElement.classList.remove(capsLockClassName);
+        }
     }
 
     // Initializes global options for VirtualKeyboard.
     public static init(globalOptions: VirtualKeyboardOptions): void
     {
-        this._globalOptions = Object.assign(this.defaultOptions, globalOptions);
+        this._globalOptions = Object.assign({}, this.defaultOptions, globalOptions);
     }
 
     // Opens the VirtualKeyboard window for the given target element.
@@ -149,6 +145,9 @@ export class VirtualKeyboard
         }
 
         this._focusedElement = targetElement;
+
+        this.capsActive = this.options.capsStartMode !== 'off';
+        this.capsLocked = this.options.capsStartMode === 'lock';
 
         if (!this._containerElement)
         {
@@ -177,8 +176,13 @@ export class VirtualKeyboard
         this.components.onVirtualKeyboardClosed(focusedElement);
     }
 
-    protected parseTargetElements(selectorOrElements: string | NodeListOf<HTMLElement> | HTMLElement): HTMLElement[]
+    protected parseTargetElements(selectorOrElements: string | NodeListOf<HTMLElement> | HTMLElement | undefined): HTMLElement[]
     {
+        if (!selectorOrElements)
+        {
+            return [];
+        }
+
         if (!this.options.allowedElements || !this.options.allowedElements.length)
         {
             throw new Error('No allowed elements specified.');
@@ -226,8 +230,27 @@ export class VirtualKeyboard
         this.components.setup(this.containerElement);
     }
 
+    protected registerDefaultComponents(): void
+    {
+        if (!this.options.components)
+        {
+            return;
+        }
+
+        const defaultComponents = this.options.components();
+        for (const component of defaultComponents)
+        {
+            this.components.add(component);
+        }
+    }
+
     protected registerFocusEventListeners(): void
     {
+        if (!this.options.openKeyboardOnFocus || this.targetElements.length === 0)
+        {
+            return;
+        }
+
         for (const element of this.targetElements)
         {
             element.addEventListener('focus', () =>
@@ -243,13 +266,17 @@ export class VirtualKeyboard
     protected createContainerElement(): HTMLElement
     {
         const containerElement = document.createElement('div');
-
         containerElement.classList.add(this.cssClassName);
         containerElement.classList.add(`${this.cssClassName}--theme-${(this.options.theme || 'default')}`);
 
         if (this.capsActive)
         {
             containerElement.classList.add(`${this.cssClassName}--caps`);
+        }
+
+        if (this.capsLocked)
+        {
+            containerElement.classList.add(`${this.cssClassName}--caps-lock`);
         }
 
         if (!!this.options.id)
